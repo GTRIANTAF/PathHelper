@@ -93,12 +93,12 @@ def main():
     
     # 1. TRY LOADING FROM FILE
     if os.path.exists("my_grades.json"):
-        print("📂 Found saved grades! Skipping login...")
+        print("Found saved grades! Skipping login...")
         with open("my_grades.json", "r") as f:
             grades = json.load(f)
     else:
         # 2. RUN SCRAPER IF NEEDED
-        print("🔄 Launching Scraper to get your grades...")
+        print("Launching Scraper to get your grades...")
         try:
             scraper = UpnetScraper()
             grades = scraper.fetch_grades_manual()
@@ -107,13 +107,13 @@ def main():
             if grades:
                 with open("my_grades.json", "w") as f:
                     json.dump(grades, f)
-                    print("💾 Grades saved to 'my_grades.json'")
+                    print("Grades saved to 'my_grades.json'")
         except Exception as e:
-            print(f"❌ Scraper failed: {e}")
+            print(f" Scraper failed: {e}")
             return
 
     if not grades:
-        print("❌ No grades found. I cannot advise you without data.")
+        print("No grades found. I cannot advise you without data.")
         return
 
     # 3. GENERATE ANALYSIS
@@ -125,7 +125,7 @@ def main():
     print("="*50 + "\n")
 
     # 4. START CHAT
-    print(f"🧠 Bootstrapping {MODEL}... (Type 'exit' to quit)\n")
+    print(f" Bootstrapping {MODEL}... (Type 'exit' to quit)\n")
     
     history = [
         {'role': 'system', 'content': SYSTEM_INSTRUCTION},
@@ -144,7 +144,7 @@ def main():
     ]
 
     while True:
-        print("🤖 Advisor is thinking...", end="", flush=True)
+        print("Student Advisor is thinking...", end="", flush=True)
         try:
             response = ollama.chat(model=MODEL, messages=history)
             bot_msg = response['message']['content']
@@ -152,14 +152,14 @@ def main():
             print(f"\n❌ Error calling Ollama: {e}")
             break
         
-        print(f"\r\033[K\n🤖 ADVISOR: {bot_msg}\n") 
+        print(f"\r\033[K\nADVISOR: {bot_msg}\n") 
         history.append({'role': 'assistant', 'content': bot_msg})
 
         print("-" * 50)
-        user_input = input("👤 You: ")
+        user_input = input("User: ")
         
         if user_input.lower() in ["exit", "quit"]:
-            print("👋 Good luck!")
+            print("Good luck finding your perfect path!")
             break
 
         history.append({'role': 'user', 'content': user_input})
