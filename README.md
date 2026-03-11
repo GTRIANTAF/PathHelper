@@ -14,4 +14,4 @@ Tech Stack:
 * Language: Python 3.13
 * AI Engine: Ollama (Llama 3.2)
 * Automation: Selenium WebDriver (Chromium)
-* OS: Linux (Ubuntu)
+* OS: Linux (Ubuntu)/Windows
