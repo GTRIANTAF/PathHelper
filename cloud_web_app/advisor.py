@@ -3,8 +3,7 @@
 import ollama
 import json
 import os
-import sys
-from upnet_api import UpnetScraper
+from PathHelper.local_Scraper.upnet_api import UpnetScraper
 
 # --- CONFIGURATION ---
 MODEL = "llama3.2"

@@ -1,0 +1,35 @@
+[theme]
+# Main accent color (buttons, sliders, etc.)
+primaryColor = "#0056D2"              # strong blue
+
+# Page background
+backgroundColor = "#F3F7FF"           # very light blue
+
+# Sidebar / widgets / cards background
+secondaryBackgroundColor = "#D6E4FF"  # soft blue
+
+# Text color
+textColor = "#001437"                 # dark navy-ish
+
+# Global font
+font = "sans serif"
+
+# ===========================
+# SERVER SETTINGS (optional)
+# ===========================
+[server]
+headless = true
+runOnSave = true
+maxUploadSize = 200
+
+# ===========================
+# BROWSER SETTINGS (optional)
+# ===========================
+[browser]
+gatherUsageStats = false
+
+# ===========================
+# CLIENT SETTINGS (optional)
+# ===========================
+[client]
+toolbarMode = "viewer"
