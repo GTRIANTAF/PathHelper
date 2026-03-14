@@ -28,7 +28,7 @@ def get_ai_response(chat_history):
 
         # Στέλνουμε το ιστορικό στο μοντέλο της Meta (Llama 3.3)
         response = client.chat.completions.create(
-            model="openai/gpt-oss-120b",
+            model="meta-llama/llama-4-scout-17b-16e-instruct",
             messages=chat_history,
             temperature=0.7,  # Πόσο "δημιουργικό" θα είναι (το 0.7 είναι ιδανικό για συμβουλές)
         )
