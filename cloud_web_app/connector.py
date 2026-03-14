@@ -30,7 +30,8 @@ def get_ai_response(chat_history):
         response = client.chat.completions.create(
             model="meta-llama/llama-4-scout-17b-16e-instruct",
             messages=chat_history,
-            temperature=0.7,  # Πόσο "δημιουργικό" θα είναι (το 0.7 είναι ιδανικό για συμβουλές)
+            temperature=0.9,  # Πόσο "δημιουργικό" θα είναι (το 0.7 είναι ιδανικό για συμβουλές)
+            max_completion_tokens=2048
         )
 
         # Επιστρέφουμε καθαρό το κείμενο που μας απάντησε το AI
