@@ -52,7 +52,7 @@ if "current_page" not in st.session_state:
 col_logo, col_title = st.columns([1, 9], vertical_alignment="center")
 
 with col_logo:
-    st.image("assets/logo_ceid.jpg", width=110)
+    st.image("logo_ceid.jpg", width=110)
 
 with col_title:
     # Χρησιμοποιούμε HTML για να κόψουμε τα μεγάλα κενά κάτω από τον τίτλο
