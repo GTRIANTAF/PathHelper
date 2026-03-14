@@ -5,3 +5,7 @@ __pycache__/
 # Ignore personal data
 my_grades.json
 *.log
+
+# Secrets
+.env
+**/ .env
