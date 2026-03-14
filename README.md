@@ -2,7 +2,7 @@
 
 Ένα ολοκληρωμένο εργαλείο υποστήριξης φοιτητών για το τμήμα Μηχανικών Η/Υ και Πληροφορικής (CEID). Το project συνδυάζει έναν τοπικό scraper για την εξαγωγή βαθμολογιών και μια cloud εφαρμογή με AI Advisor και Path Checker.
 
-## 🏗️ Αρχιτεκτονική Συστήματος
+## Αρχιτεκτονική Συστήματος
 
 Το σύστημα αποτελείται από δύο ανεξάρτητα υποσυστήματα:
 
@@ -23,8 +23,8 @@
 * Συνδεθείτε στο portal και το αρχείο `my_grades.json` θα δημιουργηθεί αυτόματα.
 
 ### 2. Χρήση του Web App
-* Επισκεφθείτε την εφαρμογή: `[ΕΔΩ ΒΑΛΕ ΤΟ LINK ΣΟΥ].streamlit.app`
-* Μεταβείτε στην καρτέλα **💬 AI Advisor**.
+* Επισκεφθείτε την εφαρμογή: `ceidassistant.streamlit.app`
+* Μεταβείτε στην καρτέλα ** AI Advisor**.
 * Ανεβάστε το αρχείο `my_grades.json` στο ειδικό πεδίο.
 * Συνομιλήστε με τον Advisor για προσωποποιημένες συμβουλές!
 
@@ -33,7 +33,7 @@
 ## 🛠️ Τεχνολογίες
 
 * **Frontend:** [Streamlit](https://streamlit.io/)
-* **AI/LLM:** [Groq Cloud API](https://groq.com/) (Llama-3.3-70b / Mixtral-8x7b)
+* **AI/LLM:** [Groq Cloud API](https://groq.com/) (llama-4-scout-17b)
 * **Web Scraping:** [Selenium](https://www.selenium.dev/) & WebDriver Manager
 * **Styling:** Custom CSS & Streamlit Theming
 
@@ -52,13 +52,13 @@
 ```text
 PathHelper/
 ├── local_Scraper/           # CLI Tool για scraping
-│   ├── upnet_api.py
+│   ├── upnet_api.py         # Json scraper
+|   ├── advisor.py           # CLI Llamma 3.2 advisor
 │   └── requirements.txt
 ├── cloud_web_app/           # Streamlit Web App
 │   ├── app.py               # Main entry point
-│   ├── advisor.py           # AI Logic (RAG)
+│   ├── connector.py         # API connection
 │   ├── knowledge_base.py    # CEID Course Data & Rules
-│   ├── connector.py         # Groq API Connector
 │   └── assets/              # Logos & Images
 ├── .gitignore
 └── requirements.txt         # Cloud dependencies
