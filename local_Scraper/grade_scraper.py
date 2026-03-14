@@ -112,10 +112,16 @@ if __name__ == "__main__":
     scraper = UpnetScraper()
     try:
         data = scraper.fetch_grades_manual()
-        for d in data:
-            print(d)
+
+        if data:
+            filename = "my_grades.json"
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+
+            print(f"\n✅ Success! Data exported to {filename}")
+        else:
+            print("\n No data found to export.")
     except Exception as e:
         print(f"Error: {e}")
     finally:
-        # scraper.close() # Keep browser open to debug if needed
         pass
