@@ -47,7 +47,7 @@ st.markdown("""
 
 # --- 1. INITIALIZE NAVIGATION STATE ---
 if "current_page" not in st.session_state:
-    st.session_state.current_page = "chat"
+    st.session_state.current_page = "checker"
 
 # --- 2. HEADER: LOGO KAI TITLE ΕΥΘΥΓΡΑΜΜΙΣΜΕΝΑ ---
 # Το vertical_alignment="center" βάζει το λογότυπο ακριβώς στη μέση του ύψους του κειμένου
