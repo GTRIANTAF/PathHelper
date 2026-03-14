@@ -1,17 +1,64 @@
-# CEID AI Academic Advisor
+# 🎓 CEID Path Helper & AI Advisor
 
-A local Retrieval-Augmented Generation (RAG) application that acts as an academic advisor for University of Patras (CEID) students. 
+Ένα ολοκληρωμένο εργαλείο υποστήριξης φοιτητών για το τμήμα Μηχανικών Η/Υ και Πληροφορικής (CEID). Το project συνδυάζει έναν τοπικό scraper για την εξαγωγή βαθμολογιών και μια cloud εφαρμογή με AI Advisor και Path Checker.
 
-This tool scrapes a student's academic history, processes it against the 2025-2026 CEID Curriculum Rules, and uses a local Large Language Model (Llama 3.2) to recommend a "Direction of Deepening" based on actual academic performance.
+## 🏗️ Αρχιτεκτονική Συστήματος
 
-Features:
-* Automated Data Pipeline: A custom Selenium scraper (`upnet_api.py`) navigates the university portal, pauses for manual CAPTCHA solving, and parses HTML tables.
-* Local RAG Architecture: Combines scraped user data with official curriculum rules stored in a JSON knowledge base, passing them to the LLM context window.
-* Privacy-First: Executes entirely on local hardware. No student data is transmitted to external APIs.
-* Rule Pre-processing: Python logic calculates course completion for "Group A" and "Group B" requirements prior to LLM inference to ensure accurate tracking.
+Το σύστημα αποτελείται από δύο ανεξάρτητα υποσυστήματα:
 
-Tech Stack:
-* Language: Python 3.13
-* AI Engine: Ollama (Llama 3.2)
-* Automation: Selenium WebDriver (Chromium)
-* OS: Linux (Ubuntu)/Windows
+1.  **Local Scraper (CLI Tool):** Τρέχει τοπικά στον υπολογιστή του χρήστη για μέγιστη ασφάλεια. Συνδέεται στο "Progress" και εξάγει τους βαθμούς σε ένα αρχείο `my_grades.json`.
+2.  **Cloud Web App (Streamlit):** Η κύρια εφαρμογή που φιλοξενείται στο Streamlit Cloud.
+    * **AI Advisor:** Ένα RAG-based chatbot (Groq Llama 3.3/Mixtral) που αναλύει τους βαθμούς σου και προτείνει μαθήματα βάσει των κανόνων του τμήματος.
+    * **Path Checker:** Ένα διαδραστικό εργαλείο ελέγχου των κανόνων λήψης διπλώματος και οργάνωσης εξαμήνων.
+
+---
+
+## 🚀 Οδηγίες Χρήσης
+
+### 1. Εξαγωγή Βαθμών (Local)
+Πριν ξεκινήσετε, πρέπει να έχετε το αρχείο με τις βαθμολογίες σας.
+* Πλοηγηθείτε στον φάκελο `local_Scraper`.
+* Εγκαταστήστε τις απαιτήσεις: `pip install -r requirements.txt`.
+* Τρέξτε τον scraper: `python upnet_api.py`.
+* Συνδεθείτε στο portal και το αρχείο `my_grades.json` θα δημιουργηθεί αυτόματα.
+
+### 2. Χρήση του Web App
+* Επισκεφθείτε την εφαρμογή: `[ΕΔΩ ΒΑΛΕ ΤΟ LINK ΣΟΥ].streamlit.app`
+* Μεταβείτε στην καρτέλα **💬 AI Advisor**.
+* Ανεβάστε το αρχείο `my_grades.json` στο ειδικό πεδίο.
+* Συνομιλήστε με τον Advisor για προσωποποιημένες συμβουλές!
+
+---
+
+## 🛠️ Τεχνολογίες
+
+* **Frontend:** [Streamlit](https://streamlit.io/)
+* **AI/LLM:** [Groq Cloud API](https://groq.com/) (Llama-3.3-70b / Mixtral-8x7b)
+* **Web Scraping:** [Selenium](https://www.selenium.dev/) & WebDriver Manager
+* **Styling:** Custom CSS & Streamlit Theming
+
+---
+
+## 🔒 Ασφάλεια & Προσωπικά Δεδομένα
+
+* **Zero-Knowledge:** Οι κωδικοί του Upnet δεν αποθηκεύονται πουθενά και δεν στέλνονται ποτέ στο cloud.
+* **Local Processing:** Η εξαγωγή των δεδομένων γίνεται αποκλειστικά στη δική σας συσκευή.
+* **Cloud Integrity:** Το Web App επεξεργάζεται μόνο τα ονόματα των μαθημάτων και τους βαθμούς που εσείς επιλέγετε να ανεβάσετε.
+
+---
+
+## 📂 Δομή Φακέλων
+
+```text
+PathHelper/
+├── local_Scraper/           # CLI Tool για scraping
+│   ├── upnet_api.py
+│   └── requirements.txt
+├── cloud_web_app/           # Streamlit Web App
+│   ├── app.py               # Main entry point
+│   ├── advisor.py           # AI Logic (RAG)
+│   ├── knowledge_base.py    # CEID Course Data & Rules
+│   ├── connector.py         # Groq API Connector
+│   └── assets/              # Logos & Images
+├── .gitignore
+└── requirements.txt         # Cloud dependencies
