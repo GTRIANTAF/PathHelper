@@ -3,7 +3,7 @@
 import ollama
 import json
 import os
-from PathHelper.local_Scraper.upnet_api import UpnetScraper
+from PathHelper.local_Scraper.grade_scraper import UpnetScraper
 
 # --- CONFIGURATION ---
 MODEL = "llama3.2"
@@ -160,9 +160,9 @@ def main():
     grades = []
 
     # 1. TRY LOADING FROM FILE
-    if os.path.exists("my_grades.json"):
+    if os.path.exists("../cloud_web_app/my_grades.json"):
         print("Found saved grades! Skipping login...")
-        with open("my_grades.json", "r", encoding="utf-8") as f:
+        with open("../cloud_web_app/my_grades.json", "r", encoding="utf-8") as f:
             grades = json.load(f)
     else:
         # 2. RUN SCRAPER IF NEEDED
@@ -173,7 +173,7 @@ def main():
             scraper.close()
 
             if grades:
-                with open("my_grades.json", "w", encoding="utf-8") as f:
+                with open("../cloud_web_app/my_grades.json", "w", encoding="utf-8") as f:
                     json.dump(grades, f, ensure_ascii=False, indent=4)
                     print("Grades saved to 'my_grades.json'")
         except Exception as e:
