@@ -294,7 +294,7 @@ elif st.session_state.current_page == "checker":
     # UI: ΤΟ ΚΟΥΜΠΙ ΕΛΕΓΧΟΥ & Ο ΑΛΓΟΡΙΘΜΟΣ
     # ==========================================
     if st.button("Οριστικός Έλεγχος & Υποβολή", type="primary", use_container_width=True):
-        st.markdown("### 📊 Τελική Αναφορά")
+        st.markdown("### **Τελική Αναφορά**")
 
         errors = 0
 
