@@ -13,7 +13,7 @@
 
 ---
 
-## 🚀 Οδηγίες Χρήσης
+## Οδηγίες Χρήσης
 
 ### 1. Εξαγωγή Βαθμών (Local)
 Πριν ξεκινήσετε, πρέπει να έχετε το αρχείο με τις βαθμολογίες σας.
@@ -21,6 +21,7 @@
 * Εγκαταστήστε τις απαιτήσεις: `pip install -r requirements.txt`.
 * Τρέξτε τον scraper: `python upnet_api.py`.
 * Συνδεθείτε στο portal και το αρχείο `my_grades.json` θα δημιουργηθεί αυτόματα.
+* Αν επιθυμήται με το αdvisor.py τρεχεται τοπικό μοντέλο RAG στο CLI
 
 ### 2. Χρήση του Web App
 * Επισκεφθείτε την εφαρμογή: `ceidassistant.streamlit.app`
@@ -30,16 +31,16 @@
 
 ---
 
-## 🛠️ Τεχνολογίες
+## Tech Stack
 
 * **Frontend:** [Streamlit](https://streamlit.io/)
 * **AI/LLM:** [Groq Cloud API](https://groq.com/) (llama-4-scout-17b)
 * **Web Scraping:** [Selenium](https://www.selenium.dev/) & WebDriver Manager
-* **Styling:** Custom CSS & Streamlit Theming
+
 
 ---
 
-## 🔒 Ασφάλεια & Προσωπικά Δεδομένα
+## Ασφάλεια & Προσωπικά Δεδομένα
 
 * **Zero-Knowledge:** Οι κωδικοί του Upnet δεν αποθηκεύονται πουθενά και δεν στέλνονται ποτέ στο cloud.
 * **Local Processing:** Η εξαγωγή των δεδομένων γίνεται αποκλειστικά στη δική σας συσκευή.
@@ -47,7 +48,7 @@
 
 ---
 
-## 📂 Δομή Φακέλων
+## Δομή Φακέλων
 
 ```text
 PathHelper/
