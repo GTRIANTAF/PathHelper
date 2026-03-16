@@ -94,10 +94,9 @@ st.markdown("<br>", unsafe_allow_html=True)
 # PAGE 1: THE PATH CHECKER
 # ==========================================
 if st.session_state.current_page == "checker":
-    from knowledge_base import CEID_COURSES, get_all_unique_courses, get_course_info, get_total_ects
+    from knowledge_base import CEID_COURSES, get_course_info, get_total_ects
 
 
-    # Η μαγική συνάρτηση που προσθέτει το (Χ) ή (Ε) δίπλα στα ονόματα ΜΟΝΟ οπτικά!
     def format_course_with_sem(course_name):
         info = get_course_info(course_name)
         if info:
@@ -107,9 +106,7 @@ if st.session_state.current_page == "checker":
 
 
     st.markdown("### 🎓 Σχεδιασμός & Έλεγχος Διπλώματος")
-    st.info("Ακολουθήστε τα 2 βήματα για να χτίσετε το ιδανικό (και έγκυρο) πρόγραμμα σπουδών.")
-
-    directions_list = list(CEID_COURSES.keys())
+    st.info("Ακολουθήστε τα 3 βήματα για να χτίσετε το ιδανικό (και έγκυρο) πρόγραμμα σπουδών.")
 
     # ==========================================
     # ΒΗΜΑ 1: ΔΥΝΑΜΙΚΗ ΕΠΙΛΟΓΗ ΒΑΣΕΙ ΚΑΝΟΝΩΝ
@@ -122,56 +119,61 @@ if st.session_state.current_page == "checker":
         "Σενάριο 3: Γενική κατεύθυνση"
     ])
 
+    # Κρύβουμε τα μαθήματα Γενικής Παιδείας από τις επιλογές Κύριας Κατεύθυνσης
+    valid_directions = [d for d in CEID_COURSES.keys() if d.startswith("Κ")]
     my_electives = []
 
     match scenario:
         case "Σενάριο 1: Μία κύρια κατεύθυνση":
-            main_dir = st.selectbox("Επιλέξτε την Κύρια Κατεύθυνση σας:", directions_list)
+            main_dir = st.selectbox("Επίλεξε Κύρια Κατεύθυνση", valid_directions)
 
             if main_dir:
                 main_group_a = list(CEID_COURSES[main_dir].get("Group_A", {}).keys())
                 main_group_b = list(CEID_COURSES[main_dir].get("Group_B", {}).keys())
 
                 other_group_a = set()
-                all_other_courses = set()
                 for d, d_data in CEID_COURSES.items():
                     if d != main_dir:
                         for c in d_data.get("Group_A", {}).keys():
                             other_group_a.add(c)
-                            all_other_courses.add(c)
-                        for c in d_data.get("Group_B", {}).keys():
-                            all_other_courses.add(c)
 
                 col1, col2 = st.columns(2)
                 with col1:
                     st.markdown(f"**Από {main_dir.split(':')[0]} (Σύνολο: 10)**")
-                    # ΒΑΖΟΥΜΕ ΤΟ format_func ΣΕ ΟΛΑ ΤΑ ΚΟΥΤΙΑ!
-                    sel_main_a = st.multiselect(f"Ομάδα Α - Απαιτούνται 5:", sorted(main_group_a), max_selections=5,
+                    sel_main_a = st.multiselect("Ομάδα Α - Απαιτούνται 5:", sorted(main_group_a), max_selections=5,
                                                 format_func=format_course_with_sem)
-                    sel_main_b = st.multiselect(f"Ομάδα Β - Απαιτούνται 5:", sorted(main_group_b), max_selections=5,
+                    sel_main_b = st.multiselect("Ομάδα Β - Απαιτούνται 5:", sorted(main_group_b), max_selections=5,
                                                 format_func=format_course_with_sem)
 
                 with col2:
-                    st.markdown("**Από Άλλες Κατευθύνσεις (Σύνολο: 7)**")
+                    st.markdown("**Από Άλλες Κατευθύνσεις (Σύνολο: 7+)**")
                     already_selected_main = sel_main_a + sel_main_b
 
                     avail_other_a = [c for c in sorted(list(other_group_a)) if c not in already_selected_main]
                     sel_other_a = st.multiselect("Ομάδα Α (από 3 άλλες) - Απαιτούνται 5:", avail_other_a,
                                                  max_selections=5, format_func=format_course_with_sem)
 
+                    avail_free = set()
+                    for d, d_data in CEID_COURSES.items():
+                        for group_dict in d_data.values():
+                            for c in group_dict.keys():
+                                avail_free.add(c)
+
                     already_selected_all = sel_main_a + sel_main_b + sel_other_a
-                    available_free = [c for c in sorted(list(all_other_courses)) if c not in already_selected_all]
-                    sel_free = st.multiselect("Ελεύθερη Επιλογή - Απαιτούνται 2:", available_free, max_selections=2,
-                                              format_func=format_course_with_sem)
+                    available_free = [c for c in sorted(list(avail_free)) if c not in already_selected_all]
+
+                    sel_free = st.multiselect("Ελεύθερη Επιλογή (Επιλέξτε όσα χρειάζονται για 85 ECTS):",
+                                              available_free, format_func=format_course_with_sem)
 
                 my_electives = sel_main_a + sel_main_b + sel_other_a + sel_free
 
         case "Σενάριο 2: Δύο κύριες κατευθύνσεις":
             col1, col2 = st.columns(2)
             with col1:
-                main_dir_1 = st.selectbox("Επιλέξτε 1η Κύρια Κατεύθυνση:", directions_list)
+                main_dir_1 = st.selectbox("Επίλεξε 1η Κύρια Κατεύθυνση", valid_directions)
             with col2:
-                main_dir_2 = st.selectbox("Επιλέξτε 2η Κύρια Κατεύθυνση:", directions_list, index=1)
+                valid_dirs_for_second = [d for d in valid_directions if d != main_dir_1]
+                main_dir_2 = st.selectbox("Επίλεξε 2η Κύρια Κατεύθυνση", valid_dirs_for_second)
 
             if main_dir_1 == main_dir_2:
                 st.warning("⚠️ Πρέπει να επιλέξετε διαφορετικές κατευθύνσεις!")
@@ -197,18 +199,19 @@ if st.session_state.current_page == "checker":
                     sel_m2_b = st.multiselect(f"Ομάδα Β ({main_dir_2.split(':')[0]}) - Απαιτούνται 2:", avail_m2_b,
                                               max_selections=2, format_func=format_course_with_sem)
 
-                st.markdown("**3️⃣ Ελεύθερη Επιλογή (Σύνολο: 3)**")
+                st.markdown("**Ελεύθερη Επιλογή (Σύνολο: 3+)**")
                 all_others = set()
                 for d, d_data in CEID_COURSES.items():
                     if d not in [main_dir_1, main_dir_2]:
-                        for g in ["Group_A", "Group_B"]:
-                            for c in d_data.get(g, {}).keys():
+                        for group_dict in d_data.values():
+                            for c in group_dict.keys():
                                 all_others.add(c)
 
                 already_selected_m1_m2 = sel_m1_a + sel_m1_b + sel_m2_a + sel_m2_b
                 avail_free_2 = [c for c in sorted(list(all_others)) if c not in already_selected_m1_m2]
-                sel_free_2 = st.multiselect("Ελεύθερη Επιλογή (από 2 άλλες κατ.) - Απαιτούνται 3:", avail_free_2,
-                                            max_selections=3, format_func=format_course_with_sem)
+
+                sel_free_2 = st.multiselect("Ελεύθερη Επιλογή (Επιλέξτε όσα χρειάζονται για 85 ECTS):", avail_free_2,
+                                            format_func=format_course_with_sem)
 
                 my_electives = sel_m1_a + sel_m1_b + sel_m2_a + sel_m2_b + sel_free_2
 
@@ -218,22 +221,23 @@ if st.session_state.current_page == "checker":
             for d, d_data in CEID_COURSES.items():
                 for c in d_data.get("Group_A", {}).keys():
                     all_group_a.add(c)
-                    all_courses_set.add(c)
-                for c in d_data.get("Group_B", {}).keys():
-                    all_courses_set.add(c)
+                for group_dict in d_data.values():
+                    for c in group_dict.keys():
+                        all_courses_set.add(c)
 
             sel_gen_a = st.multiselect("Ομάδα Α από όλες - Απαιτούνται 10:", sorted(list(all_group_a)),
                                        max_selections=10, format_func=format_course_with_sem)
             available_free_gen = [c for c in sorted(list(all_courses_set)) if c not in sel_gen_a]
-            sel_gen_free = st.multiselect("Ελεύθερη Επιλογή (από 4 κατ.) - Απαιτούνται 7:", available_free_gen,
-                                          max_selections=7, format_func=format_course_with_sem)
+
+            sel_gen_free = st.multiselect("Ελεύθερη Επιλογή (Επιλέξτε όσα χρειάζονται για 85 ECTS):",
+                                          available_free_gen, format_func=format_course_with_sem)
 
             my_electives = sel_gen_a + sel_gen_free
 
     st.divider()
 
     # ==========================================
-    # ΒΗΜΑ 2: ΧΡΟΝΟΛΟΓΙΚΟΣ ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΣ (ΕΞΑΜΗΝΑ)
+    # ΒΗΜΑ 2: ΧΡΟΝΟΛΟΓΙΚΟΣ ΠΡΟΓΡΑΜΜΑΤΙΣΜΟΣ
     # ==========================================
     st.markdown("### **Βήμα 2**: Κατανομή στα Εξάμηνα")
 
@@ -245,11 +249,11 @@ if st.session_state.current_page == "checker":
 
     if len(my_electives) > 0:
         st.info(
-            f"Έχεις επιλέξει συνολικά {len(my_electives)}/17 μαθήματα. Από αυτά, τα {len(my_winter)} είναι Χειμερινά (επιτρέπονται 11) και τα {len(my_spring)} είναι Εαρινά (επιτρέπονται 6).")
+            f"Έχεις επιλέξει συνολικά {len(my_electives)} μαθήματα. Από αυτά, τα {len(my_winter)} είναι Χειμερινά και τα {len(my_spring)} είναι Εαρινά.")
 
         st.markdown("**🌸 8ο Εξάμηνο (Εαρινό)**")
-        st.multiselect("Τα Εαρινά μαθήματα τοποθετούνται αυτόματα εδώ (Απαιτούνται 6):", my_spring, default=my_spring,
-                       disabled=True, format_func=format_course_with_sem)
+        st.multiselect("Τα Εαρινά μαθήματα τοποθετούνται αυτόματα εδώ:", my_spring, default=my_spring, disabled=True,
+                       format_func=format_course_with_sem)
 
         st.markdown("**🍂 7ο και 9ο Εξάμηνο (Χειμερινά)**")
         col7, col9 = st.columns(2)
@@ -260,10 +264,18 @@ if st.session_state.current_page == "checker":
 
         with col9:
             leftovers_for_9 = [c for c in my_winter if c not in sem7]
-            sem9 = st.multiselect("9ο Εξάμηνο (Απομένουν 6):", leftovers_for_9, default=leftovers_for_9, disabled=True,
+            sem9 = st.multiselect("9ο Εξάμηνο (Τα υπόλοιπα):", leftovers_for_9, default=leftovers_for_9, disabled=True,
                                   format_func=format_course_with_sem)
     else:
         st.warning("Επιλέξτε μαθήματα στο Βήμα 1 για να ξεκλειδώσετε τον προγραμματισμό των εξαμήνων.")
+
+    st.divider()
+
+    # ==========================================
+    # ΒΗΜΑ 3: ΔΙΠΛΩΜΑΤΙΚΗ ΕΡΓΑΣΙΑ
+    # ==========================================
+    st.markdown("### **Βήμα 3**: Διπλωματική Εργασία")
+    thesis_checked = st.checkbox("Έχω αναλάβει / Ολοκληρώσει Διπλωματική Εργασία (30 ECTS)", value=False)
 
     st.divider()
 
@@ -272,27 +284,71 @@ if st.session_state.current_page == "checker":
     # ==========================================
     if st.button("Οριστικός Έλεγχος & Υποβολή", type="primary", use_container_width=True):
         st.markdown("### **Τελική Αναφορά**")
-
         errors = 0
 
-        if len(my_electives) == 17:
-            st.success("✅ **Ποσότητα:** Ακριβώς 17 μαθήματα (85 ECTS).")
-        else:
-            st.error(f"❌ **Ποσότητα:** Έχεις {len(my_electives)}/17. Πρέπει να διαλέξεις ακριβώς 17 στο Βήμα 1.")
-            errors += 1
+        # --- 1. ΕΛΕΓΧΟΣ ΠΟΣΟΤΗΤΑΣ & ECTS ---
+        total_elective_ects = get_total_ects(my_electives)
 
-        if len(my_winter) == 11 and len(my_spring) == 6:
-            st.success("✅ **Εξάμηνα:** Ιδανική κατανομή (11 Χειμερινά, 6 Εαρινά).")
+        if len(my_electives) >= 17 and total_elective_ects >= 85:
+            st.success(
+                f"✅ **Μαθήματα & ECTS:** Έχεις {len(my_electives)} μαθήματα και συγκεντρώνεις {total_elective_ects} ECTS από επιλογές.")
+        else:
+            if len(my_electives) < 17:
+                st.error(
+                    f"❌ **Μαθήματα:** Έχεις {len(my_electives)}/17. Πρέπει να διαλέξεις τουλάχιστον 17 στο Βήμα 1.")
+                errors += 1
+            if total_elective_ects < 85:
+                st.error(f"❌ **ECTS:** Έχεις {total_elective_ects}/85 ECTS. Χρειάζεσαι επιπλέον μαθήματα!")
+                errors += 1
+
+        # --- 2. ΕΛΕΓΧΟΣ ΕΞΑΜΗΝΩΝ (Χαλαρός έλεγχος με >=) ---
+        if len(my_winter) >= 11 and len(my_spring) >= 6:
+            st.success(f"✅ **Εξάμηνα:** Αποδεκτή κατανομή ({len(my_winter)} Χειμερινά, {len(my_spring)} Εαρινά).")
         else:
             st.error(
-                f"❌ **Εξάμηνα:** Έχεις {len(my_winter)} Χειμερινά (πρέπει 11) και {len(my_spring)} Εαρινά (πρέπει 6). Άλλαξε κάποιες επιλογές στο Βήμα 1.")
+                f"❌ **Εξάμηνα:** Έχεις {len(my_winter)} Χειμερινά (πρέπει τουλάχιστον 11) και {len(my_spring)} Εαρινά (πρέπει τουλάχιστον 6).")
             errors += 1
 
         if len(sem7) != 5:
-            st.error(f"❌ **7ο Εξάμηνο:** Έχεις βάλει {len(sem7)} μαθήματα. Πρέπει να επιλέξεις ακριβώς 5 στο Βήμα 2.")
+            st.error(f"❌ **7ο Εξάμηνο:** Έχεις βάλει {len(sem7)} μαθήματα. Πρέπει να επιλέξεις ακριβώς 5.")
             errors += 1
 
-        # Βασικός Κανόνας (Κ1, Κ2/3/4, Κ5/6)
+        # --- 3. ΕΛΕΓΧΟΣ ΔΙΑΣΠΟΡΑΣ ΑΝΑ ΣΕΝΑΡΙΟ ---
+        if scenario == "Σενάριο 1: Μία κύρια κατεύθυνση":
+            unique_dirs = set()
+            for c in sel_other_a:
+                for d, d_data in CEID_COURSES.items():
+                    if d != main_dir and c in d_data.get("Group_A", {}):
+                        unique_dirs.add(d)
+            if len(unique_dirs) < 3 and len(sel_other_a) > 0:
+                st.error(
+                    f"❌ **Διασπορά:** Τα 5 μαθήματα Ομάδας Α πρέπει να προέρχονται από τουλάχιστον 3 άλλες κατευθύνσεις (έχεις από {len(unique_dirs)}).")
+                errors += 1
+
+        elif scenario == "Σενάριο 2: Δύο κύριες κατευθύνσεις":
+            unique_dirs = set()
+            for c in sel_free_2:
+                for d, d_data in CEID_COURSES.items():
+                    if d not in [main_dir_1, main_dir_2] and (
+                            c in d_data.get("Group_A", {}) or c in d_data.get("Group_B", {})):
+                        unique_dirs.add(d)
+            if len(unique_dirs) < 2 and len(sel_free_2) > 0:
+                st.error(
+                    f"❌ **Διασπορά:** Τα μαθήματα ελεύθερης επιλογής πρέπει να προέρχονται από τουλάχιστον 2 άλλες κατευθύνσεις (έχεις από {len(unique_dirs)}).")
+                errors += 1
+
+        elif scenario == "Σενάριο 3: Γενική κατεύθυνση":
+            unique_dirs = set()
+            for c in sel_gen_free:
+                for d, d_data in CEID_COURSES.items():
+                    if c in d_data.get("Group_A", {}) or c in d_data.get("Group_B", {}):
+                        unique_dirs.add(d)
+            if len(unique_dirs) < 4 and len(sel_gen_free) > 0:
+                st.error(
+                    f"❌ **Διασπορά:** Τα 7 μαθήματα ελεύθερης επιλογής πρέπει να προέρχονται από τουλάχιστον 4 κατευθύνσεις (έχεις από {len(unique_dirs)}).")
+                errors += 1
+
+        # --- 4. ΒΑΣΙΚΟΣ ΚΑΝΟΝΑΣ (Πυλώνες) ---
         has_k1 = any(c in CEID_COURSES["Κ1: Αλγοριθμικές Θεμελιώσεις"].get("Group_A", {}) or c in CEID_COURSES[
             "Κ1: Αλγοριθμικές Θεμελιώσεις"].get("Group_B", {}) for c in my_electives)
         has_hw = any(any(
@@ -310,9 +366,15 @@ if st.session_state.current_page == "checker":
                 "❌ **Βασικός Κανόνας:** Λείπει μάθημα από βασικό πυλώνα (Πρέπει 1 από Κ1, 1 από Υλικό Κ2-Κ4, 1 από Λογισμικό Κ5-Κ6).")
             errors += 1
 
+        # --- 5. ΕΛΕΓΧΟΣ ΔΙΠΛΩΜΑΤΙΚΗΣ ---
+        if thesis_checked:
+            st.success("✅ **Διπλωματική:** Υπολογίστηκαν 30 ECTS.")
+        else:
+            st.warning("⚠️ **Διπλωματική:** Δεν την έχεις τσεκάρει. Απαιτείται για τη λήψη του διπλώματος.")
+
+        # --- 6. ΤΕΛΙΚΟ ΑΠΟΤΕΛΕΣΜΑ ---
         if errors == 0:
-            st.balloons()
-            st.success("### 🎉 Το Πρόγραμμά σου είναι τέλειο και έτοιμο για υποβολή στη Γραμματεία!")
+            st.success("### 🎉 Το Πρόγραμμά σου είναι τέλειο και πλήρως εναρμονισμένο με τους κανόνες του CEID!")
 
 # ==========================================
 # PAGE 2: THE AI ADVISOR

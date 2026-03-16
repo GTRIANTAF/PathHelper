@@ -3,7 +3,6 @@ import streamlit as st
 from groq import Groq
 from dotenv import load_dotenv
 
-# Φορτώνει τα τοπικά κλειδιά από το .env αρχείο (όταν το τρέχεις στο δικό σου PC)
 load_dotenv()
 
 
@@ -26,7 +25,6 @@ def get_ai_response(chat_history):
     try:
         client = Groq(api_key=api_key)
 
-        # Στέλνουμε το ιστορικό στο μοντέλο της Meta (Llama 3.3)
         response = client.chat.completions.create(
             model="meta-llama/llama-4-scout-17b-16e-instruct",
             messages=chat_history,
