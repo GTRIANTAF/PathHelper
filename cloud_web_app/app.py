@@ -382,23 +382,40 @@ if st.session_state.current_page == "checker":
 elif st.session_state.current_page == "chat":
 
     st.sidebar.markdown("### 🎓 My Progress")
-    st.sidebar.info("Run the local scraper and upload your my_grades.json file here.")
+    # --- 1. ΚΟΥΜΠΙ ΛΗΨΗΣ ΤΟΥ SCRAPER (.exe) ---
+    #st.markdown("**Βήμα 1: Εξαγωγή Βαθμών**")
+    #st.info(
+    #    "Κατέβασε και τρέξε το εργαλείο στον υπολογιστή σου για να πάρεις τους βαθμούς σου με 100% ασφάλεια.")
 
-    uploaded_file = st.file_uploader("Upload Grades (JSON)", type=["json"])
+    # Ψάχνουμε το .exe στον φάκελο assets
+    #scraper_path = Path(__file__).parent / "assets" / "ceid_progress_scraper.exe"
 
-    # Initialize a session state to hold the grades globally
+    #if scraper_path.exists():
+    #    with open(scraper_path, "rb") as file:
+    #        st.download_button(
+    #            label="🔽 Λήψη Scraper (.exe)",
+    #            data=file,
+    #            file_name="ceid_progress_scraper.exe",
+    #            mime="application/octet-stream",
+    #            use_container_width=True
+    #        )
+    #else:
+    #    st.warning("⚠️ Το αρχείο scraper δεν βρέθηκε. Βεβαιώσου ότι είναι στον φάκελο assets.")
+    #
+    #st.divider()
+
+    # --- 2. ΚΟΥΜΠΙ ΑΝΕΒΑΣΜΑΤΟΣ ΤΟΥ JSON ---
+    st.markdown("**Ανέβασμα Δεδομένων**")
+    uploaded_file = st.file_uploader("Upload my_grades.json", type=["json"])
+
     if "user_grades" not in st.session_state:
         st.session_state.user_grades = []
 
     if uploaded_file is not None:
         try:
-            # Read the JSON file
             grades_data = json.load(uploaded_file)
-
-            # Save the list of passed courses to session state
             st.session_state.user_grades = grades_data
-
-            st.sidebar.success(f"✅ Successfully loaded {len(grades_data)} passed courses!")
+            st.success(f"✅ Φορτώθηκαν {len(grades_data)} περασμένα μαθήματα!")
         except Exception as e:
             st.error(f"Error reading file: {e}")
 
