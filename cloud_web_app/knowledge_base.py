@@ -225,5 +225,30 @@ def get_course_info(course_name):
     for direction, groups in CEID_COURSES.items():
         for group, courses_dict in groups.items():
             if course_name in courses_dict:
-                return courses_dict[course_name]
+                info = courses_dict[course_name].copy()
+                info["direction"] = direction.split(":")[0].strip() if ":" in direction else "-"
+                return info
     return None
+
+def get_all_available_courses():
+    courses = set()
+    for d_data in CEID_COURSES.values():
+        for group_dict in d_data.values():
+            for c in group_dict.keys():
+                courses.add(c)
+    return sorted(list(courses))
+
+def get_group_a_courses_except(direction):
+    courses = set()
+    for d, d_data in CEID_COURSES.items():
+        if d != direction:
+            for c in d_data.get("Group_A", {}).keys():
+                courses.add(c)
+    return sorted(list(courses))
+
+def get_all_group_a_courses():
+    courses = set()
+    for d_data in CEID_COURSES.values():
+        for c in d_data.get("Group_A", {}).keys():
+            courses.add(c)
+    return sorted(list(courses))
