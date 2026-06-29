@@ -44,6 +44,39 @@ st.markdown("""
             border: 1px solid #3498db; /* Γαλάζιο περίγραμμα */
             border-radius: 6px;
         }
+
+        /* 4. Δυναμικά Premium Buttons (Hover effects & Micro-animations) */
+        div.stButton > button {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border-radius: 8px;
+            font-weight: 600;
+            border: 1px solid #e0e6ed;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            background-color: #ffffff;
+            color: #2c3e50;
+        }
+
+        div.stButton > button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.15);
+            border-color: #3498db;
+            color: #3498db;
+        }
+
+        /* Primary Buttons (Gradient & Solid) */
+        div.stButton > button[kind="primary"] {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 10px rgba(41, 128, 185, 0.3);
+        }
+
+        div.stButton > button[kind="primary"]:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #1f6391 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(41, 128, 185, 0.4);
+            color: white;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -83,17 +116,20 @@ with col_page_title:
         st.markdown("<h2> Path Checker</h2>", unsafe_allow_html=True)
 
 with col_icon1:
-    if st.button("Chat", help="Chat with AI", use_container_width=True):
+    btn_type = "primary" if st.session_state.current_page == "chat" else "secondary"
+    if st.button("Chat", help="Chat with AI", use_container_width=True, type=btn_type):
         st.session_state.current_page = "chat"
         st.rerun()
 
 with col_icon2:
-    if st.button("Checker", help="Check Path Rules", use_container_width=True):
+    btn_type = "primary" if st.session_state.current_page == "checker" else "secondary"
+    if st.button("Checker", help="Check Path Rules", use_container_width=True, type=btn_type):
         st.session_state.current_page = "checker"
         st.rerun()
 
 with col_icon3:
-    if st.button("Profile", help="My Profile & Scenarios", use_container_width=True):
+    btn_type = "primary" if st.session_state.current_page == "profile" else "secondary"
+    if st.button("Profile", help="My Profile & Scenarios", use_container_width=True, type=btn_type):
         st.session_state.current_page = "profile"
         st.rerun()
 
