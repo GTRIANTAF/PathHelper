@@ -1,5 +1,9 @@
 import streamlit as st
 from pathlib import Path
+import sys
+
+# Ensure the app directory is in the Python path for Streamlit Cloud
+sys.path.append(str(Path(__file__).parent))
 
 st.set_page_config(page_title="CEID Path Advisor", layout="wide", initial_sidebar_state="collapsed")
 
