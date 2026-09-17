@@ -22,24 +22,21 @@ def generate_code() -> str:
     return f"{random.randint(0, 999999):06d}"
 
 
-def send_code(am: str) -> str:
+def send_code(am: str) -> tuple[bool, str]:
     """
     Generate a code, store it, and 'send' it.
-
-    MOCK MODE: returns the code so the caller can show it on screen.
-    REAL MODE (future): send via smtplib to up{am}@upnet.gr and return None.
+    Returns (True, "") on success, or (False, "error message") on failure.
     """
     code = generate_code()
     _pending[am] = {"code": code, "expires": time.time() + CODE_TTL_SECONDS}
 
     import smtplib, ssl
-    import os
     from email.mime.text import MIMEText
     from email.mime.multipart import MIMEMultipart
     
     # Using the credentials provided
     smtp_user = "ceidpathadvisor@gmail.com"
-    smtp_pass = "Mamaka123!"
+    smtp_pass = "dqpdfeyazeetpfyv"
     
     recipient = f"up{am}@ac.upatras.gr"
     msg = MIMEMultipart()
@@ -54,10 +51,13 @@ def send_code(am: str) -> str:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
             server.login(smtp_user, smtp_pass)
             server.sendmail(smtp_user, recipient, msg.as_string())
+    except smtplib.SMTPAuthenticationError:
+        return False, "Σφάλμα ταυτοποίησης email (SMTP Auth Error). Βεβαιωθείτε ότι χρησιμοποιείτε 'App Password' της Google και όχι τον κανονικό κωδικό."
     except Exception as e:
         print(f"Failed to send email: {e}")
+        return False, f"Αποτυχία αποστολής email: {str(e)}"
         
-    return None  # Return None on success so it doesn't show in UI
+    return True, ""
 
 
 def verify_code(am: str, entered: str) -> tuple[bool, str]:
