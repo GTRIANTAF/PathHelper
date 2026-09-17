@@ -1,9 +1,197 @@
 import streamlit as st
 import json
+import os
+import sys
 from knowledge_base import CEID_COURSES
 from connector import get_ai_response
+from mcp_client import StreamlitMCPClient
 
 def render():
+    if "mcp_client" not in st.session_state:
+        import time
+        # Create a placeholder for the cool animation
+        loading_placeholder = st.empty()
+        
+        import streamlit.components.v1 as components
+
+        html_code = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #050914; overflow: hidden; cursor: crosshair; }
+                #aurora-canvas { display: block; width: 100%; height: 100%; }
+                .hud { position: absolute; top: 20px; left: 20px; display: flex; align-items: center; gap: 8px; pointer-events: none; user-select: none; }
+                .ping { width: 8px; height: 8px; border-radius: 50%; background: #00f2fe; animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+                .text { font-size: 12px; font-family: monospace; letter-spacing: 2px; color: rgba(0, 242, 254, 0.8); }
+                @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+            </style>
+        </head>
+        <body>
+            <canvas id="aurora-canvas"></canvas>
+            <div class="hud">
+                <span class="ping"></span>
+                <span class="text">AURA ENGINE</span>
+            </div>
+            <script>
+                // Streamlit isolates components in an iframe. 
+                // Since this is a srcdoc iframe, it's same-origin! We can access the parent DOM to make the iframe fullscreen!
+                try {
+                    const parentDoc = window.parent.document;
+                    const iframes = parentDoc.querySelectorAll('iframe');
+                    iframes.forEach(iframe => {
+                        if (iframe.contentWindow === window) {
+                            iframe.style.position = 'fixed';
+                            iframe.style.top = '0';
+                            iframe.style.left = '0';
+                            iframe.style.width = '100vw';
+                            iframe.style.height = '100vh';
+                            iframe.style.zIndex = '2147483647';
+                            iframe.style.border = 'none';
+                        }
+                    });
+                } catch(e) {
+                    console.error("Could not make iframe fullscreen", e);
+                }
+
+                const canvas = document.getElementById('aurora-canvas');
+                const ctx = canvas.getContext('2d');
+                
+                let width = window.innerWidth;
+                let height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+
+                window.addEventListener('resize', () => {
+                    width = window.innerWidth;
+                    height = window.innerHeight;
+                    canvas.width = width;
+                    canvas.height = height;
+                });
+
+                const mouse = { x: -1000, y: -1000, targetX: -1000, targetY: -1000 };
+                window.addEventListener('mousemove', (e) => {
+                    mouse.targetX = e.clientX;
+                    mouse.targetY = e.clientY;
+                });
+                window.addEventListener('mouseleave', () => {
+                    mouse.targetX = -1000;
+                    mouse.targetY = -1000;
+                });
+
+                const speed = 0.8;
+                const amplitude = 80;
+                const glowStrength = 30;
+                const lineCount = 5;
+
+                let time = 0;
+                
+                const particles = Array.from({ length: 30 }, () => ({
+                  x: Math.random() * width,
+                  y: Math.random() * height,
+                  size: Math.random() * 2 + 0.5,
+                  speed: Math.random() * 0.3 + 0.1,
+                  alpha: Math.random() * 0.5 + 0.1,
+                  angle: Math.random() * Math.PI * 2,
+                }));
+
+                function render() {
+                  time += speed * 0.008;
+
+                  mouse.x += (mouse.targetX - mouse.x) * 0.08;
+                  mouse.y += (mouse.targetY - mouse.y) * 0.08;
+
+                  ctx.fillStyle = '#050914';
+                  ctx.fillRect(0, 0, width, height);
+
+                  particles.forEach(p => {
+                    p.angle += 0.002;
+                    p.x += Math.cos(p.angle) * p.speed;
+                    p.y -= p.speed;
+
+                    if (p.y < 0) p.y = height;
+                    if (p.x < 0 || p.x > width) p.x = Math.random() * width;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(0, 242, 254, ${p.alpha})`;
+                    ctx.fill();
+                  });
+
+                  ctx.save();
+                  ctx.shadowBlur = glowStrength;
+                  ctx.shadowColor = 'rgba(0, 242, 254, 0.5)';
+
+                  for (let i = 0; i < lineCount; i++) {
+                    const ratio = i / lineCount;
+                    const waveTime = time + (i * 0.35);
+
+                    ctx.beginPath();
+
+                    const gradient = ctx.createLinearGradient(0, height, width, 0);
+                    gradient.addColorStop(0, '#00f2fe');
+                    gradient.addColorStop(0.5, '#4facfe');
+                    gradient.addColorStop(1, '#7f00ff');
+
+                    ctx.strokeStyle = gradient;
+                    ctx.lineWidth = 3.5 * (1.2 - ratio * 0.8);
+                    ctx.globalAlpha = 0.2 + (1 - ratio) * 0.6;
+                    ctx.globalCompositeOperation = 'screen';
+
+                    for (let x = 0; x <= width; x += 4) {
+                      const xNorm = x / width;
+                      const envelope = Math.sin(xNorm * Math.PI);
+
+                      const wave1 = Math.sin(xNorm * Math.PI * 1.5 + waveTime);
+                      const wave2 = Math.cos(xNorm * Math.PI * 2.5 - waveTime * 0.8);
+
+                      const diagonalBaseY = height * (1.0 - xNorm) * 0.8 + (height * 0.1);
+                      let y = diagonalBaseY + (wave1 * amplitude * 0.7 * envelope) + (wave2 * amplitude * 0.3 * envelope);
+
+                      const dx = x - mouse.x;
+                      const dy = y - mouse.y;
+                      const distance = Math.sqrt(dx * dx + dy * dy);
+                      if (distance < 150) {
+                        const force = (1 - distance / 150);
+                        y += (dy > 0 ? 1 : -1) * force * 50 * envelope;
+                      }
+
+                      if (x === 0) {
+                        ctx.moveTo(x, y);
+                      } else {
+                        ctx.lineTo(x, y);
+                      }
+                    }
+                    ctx.stroke();
+                  }
+                  ctx.restore();
+
+                  requestAnimationFrame(render);
+                }
+                render();
+            </script>
+        </body>
+        </html>
+        """
+
+        with loading_placeholder:
+            components.html(html_code, height=600)
+
+        server_path = os.path.join(os.path.dirname(__file__), "..", "ceid_mcp_server.py")
+        st.session_state.mcp_client = StreamlitMCPClient(
+            command=sys.executable,
+            args=[server_path]
+        )
+        try:
+            st.session_state.mcp_tools = st.session_state.mcp_client.get_tools()
+            time.sleep(1.5) # Allow the user to see the cool animation briefly before it clears!
+        except Exception as e:
+            st.error(f"Failed to load MCP tools: {e}")
+            st.session_state.mcp_tools = None
+            
+        # Clear the animation once loading is complete
+        loading_placeholder.empty()
+
     st.sidebar.markdown("### My Progress")
     st.markdown("**Ανέβασμα Δεδομένων**")
     uploaded_file = st.file_uploader("Upload my_grades.json", type=["json"])
@@ -85,6 +273,10 @@ def render():
 
         with st.chat_message("assistant"):
             with st.spinner("Ο Advisor αναλύει το πρόγραμμα σπουδών..."):
-                bot_reply = get_ai_response(st.session_state.chat_history)
+                bot_reply = get_ai_response(
+                    st.session_state.chat_history,
+                    mcp_client=st.session_state.get("mcp_client"),
+                    tools=st.session_state.get("mcp_tools")
+                )
                 st.markdown(bot_reply)
                 st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
