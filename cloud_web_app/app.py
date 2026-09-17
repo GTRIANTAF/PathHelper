@@ -179,11 +179,24 @@ with col_logo:
     else:
         st.info("CEID Logo")
 
+
 with col_title:
-    st.markdown("<h1 style='padding-bottom: 0px; margin-bottom: 0px;'>CEID Path Advisor</h1>", unsafe_allow_html=True)
+    am = st.session_state.get("logged_in_am")
+    title_suffix = (
+        f"<span style='font-size:13px;font-weight:500;color:#27ae60;"
+        f"background:#eafaf1;padding:3px 10px;border-radius:12px;"
+        f"margin-left:12px;vertical-align:middle;'>ΑΜ {am}</span>"
+        if am else ""
+    )
     st.markdown(
-        "<p style='color: #555555; font-size: 15px; margin-top: 0px;'>Department of Computer Engineering & Informatics</p>",
-        unsafe_allow_html=True)
+        f"<h1 style='padding-bottom:0;margin-bottom:0;'>CEID Path Advisor {title_suffix}</h1>",
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        "<p style='color:#555555;font-size:15px;margin-top:0;'>"
+        "Department of Computer Engineering &amp; Informatics</p>",
+        unsafe_allow_html=True,
+    )
 
 st.divider()
 

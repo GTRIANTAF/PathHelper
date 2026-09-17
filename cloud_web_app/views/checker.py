@@ -513,6 +513,9 @@ def render():
 
         with st.form("save_scenario_form"):
             st.markdown("#### Αποθήκευση στο Προφίλ")
+            am = st.session_state.get("logged_in_am")
+            if not am:
+                st.warning("Συνδέσου από την καρτέλα **Profile** για να αποθηκεύσεις σενάρια στον λογαριασμό σου.")
             scen_name = st.text_input("Όνομα Σεναρίου (π.χ. 'Το τέλειο πλάνο')")
             if st.form_submit_button("Αποθήκευση Σεναρίου") and scen_name:
                 save_scenario(scen_name, {
@@ -526,5 +529,9 @@ def render():
                     "sem7": sem7,
                     "sem9": sem9,
                     "valid": (errors == 0),
-                })
-                st.success(f"Το σενάριο '{scen_name}' αποθηκεύτηκε!")
+                }, am=am)
+                if am:
+                    st.success(f"Το σενάριο '{scen_name}' αποθηκεύτηκε στον λογαριασμό ΑΜ {am}!")
+                else:
+                    st.success(f"Το σενάριο '{scen_name}' αποθηκεύτηκε (ανώνυμα).")
+
