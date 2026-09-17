@@ -11,7 +11,7 @@ def _render_login():
     st.markdown("### Σύνδεση με Webmail")
     st.info(
         "Εισάγετε τον Αριθμό Μητρώου σας (ΑΜ). Θα σας σταλεί ένας κωδικός "
-        "επαλήθευσης στο webmail **upXXXXXX@upnet.gr** για να συνδεθείτε."
+        "επαλήθευσης στο webmail **upXXXXXXX@ac.upatras.gr** για να συνδεθείτε."
     )
 
     # ── Step 1 : enter AM ────────────────────
@@ -32,14 +32,6 @@ def _render_login():
     if "_pending_am" in st.session_state:
         pending_am = st.session_state["_pending_am"]
         st.success(f"Κωδικός στάλθηκε για ΑΜ: **{pending_am}**")
-
-        # MOCK: show the code in a highlighted box
-        mock_code = st.session_state.get("_pending_code")
-        if mock_code:
-            st.warning(
-                f"**[MOCK MODE]** Ο κωδικός σου είναι: `{mock_code}`\n\n"
-                "_Αφού συνδεθείς με SMTP email, αυτό το μήνυμα θα αφαιρεθεί._"
-            )
 
         with st.form("code_form"):
             code_input = st.text_input("Εισάγετε τον κωδικό επαλήθευσης:", max_chars=6, placeholder="6-ψήφιος κωδικός")
@@ -106,7 +98,7 @@ def _render_scenarios(am: str):
                     st.session_state.check_performed = False
                     # Clear card picker slot states so they re-init from loaded scenario
                     for k in list(st.session_state.keys()):
-                        if k.startswith("sel_s") or k == "_load_sig":
+                        if k.startswith("sel_s") or k.startswith("sem7_") or k == "_load_sig":
                             del st.session_state[k]
                     st.session_state.current_page = "checker"
                     st.rerun()

@@ -8,12 +8,11 @@ smtplib logic and stop returning the code to the UI.
 
 import random
 import time
+from typing import Dict
 
 
 # In-memory store: { am: {"code": "123456", "expires": <timestamp>} }
-# This lives in the Python process memory; it's cleared on server restart.
-# For production, migrate to a database or st.session_state per-user.
-_pending: dict[str, dict] = {}
+_pending: Dict[str, dict] = {}
 
 CODE_TTL_SECONDS = 600  # 10 minutes
 
@@ -33,28 +32,32 @@ def send_code(am: str) -> str:
     code = generate_code()
     _pending[am] = {"code": code, "expires": time.time() + CODE_TTL_SECONDS}
 
-    # ── MOCK: just return the code ──────────────────────────────────────
-    # ── REAL (uncomment when SMTP is ready): ────────────────────────────
-    # import smtplib, ssl
-    # from email.mime.text import MIMEText
-    # from email.mime.multipart import MIMEMultipart
-    # import streamlit as st
-    # smtp_user = st.secrets["SMTP_EMAIL"]
-    # smtp_pass = st.secrets["SMTP_PASSWORD"]
-    # recipient = f"up{am}@upnet.gr"
-    # msg = MIMEMultipart()
-    # msg["From"] = smtp_user
-    # msg["To"] = recipient
-    # msg["Subject"] = "CEID Path Advisor — Κωδικός Επαλήθευσης"
-    # body = f"Ο κωδικός επαλήθευσής σου είναι: {code}\nΙσχύει για 10 λεπτά."
-    # msg.attach(MIMEText(body, "plain", "utf-8"))
-    # context = ssl.create_default_context()
-    # with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-    #     server.login(smtp_user, smtp_pass)
-    #     server.sendmail(smtp_user, recipient, msg.as_string())
-    # return None   # hide code from UI in real mode
-
-    return code   # ← remove this line in real mode
+    import smtplib, ssl
+    import os
+    from email.mime.text import MIMEText
+    from email.mime.multipart import MIMEMultipart
+    
+    # Using the credentials provided
+    smtp_user = "ceidpathadvisor@gmail.com"
+    smtp_pass = "Mamaka123!"
+    
+    recipient = f"up{am}@ac.upatras.gr"
+    msg = MIMEMultipart()
+    msg["From"] = smtp_user
+    msg["To"] = recipient
+    msg["Subject"] = "CEID Path Advisor — Κωδικός Επαλήθευσης"
+    body = f"Ο κωδικός επαλήθευσής σου είναι: {code}\nΙσχύει για 10 λεπτά."
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+    
+    context = ssl.create_default_context()
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(smtp_user, recipient, msg.as_string())
+    except Exception as e:
+        print(f"Failed to send email: {e}")
+        
+    return None  # Return None on success so it doesn't show in UI
 
 
 def verify_code(am: str, entered: str) -> tuple[bool, str]:
