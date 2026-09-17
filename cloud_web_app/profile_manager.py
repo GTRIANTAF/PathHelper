@@ -1,68 +1,73 @@
-import json
 import os
+import json
+from typing import Optional
 from fpdf import FPDF
 from knowledge_base import get_course_info
+import streamlit as st
+from supabase import create_client, Client
 
-SCENARIOS_FILE = os.path.join(os.path.dirname(__file__), "saved_scenarios.json")
+# Initialize Supabase client
+@st.cache_resource
+def init_supabase() -> Client:
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
 
-
-# ─────────────────────────────────────────────
-#  JSON I/O  (per-AM structure)
-# ─────────────────────────────────────────────
-
-def _load_all() -> dict:
-    """Load the full JSON file.  Returns {} on missing / corrupt file."""
-    if os.path.exists(SCENARIOS_FILE):
-        try:
-            with open(SCENARIOS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            return {}
-    return {}
-
-
-def _save_all(data: dict) -> None:
-    with open(SCENARIOS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-
+try:
+    supabase = init_supabase()
+except Exception as e:
+    supabase = None
+    print(f"Supabase connection error: {e}")
 
 # ─────────────────────────────────────────────
-#  PUBLIC API
+#  PUBLIC API (SUPABASE)
 # ─────────────────────────────────────────────
 
-def load_scenarios(am: str | None = None) -> dict:
+def load_scenarios(am: Optional[str] = None) -> dict:
     """
-    If am is provided → return only that student's scenarios.
-    If am is None     → return all scenarios (legacy / admin view).
+    If am is provided → return only that student's scenarios from Supabase.
+    If am is None     → return {} (admin view not supported in supabase yet).
     """
-    all_data = _load_all()
-    if am is None:
-        return all_data
-    return all_data.get(str(am), {})
+    if not supabase or not am:
+        return {}
+    
+    try:
+        response = supabase.table("scenarios").select("scenario_name, data").eq("am", str(am)).execute()
+        result = {}
+        for row in response.data:
+            result[row["scenario_name"]] = row["data"]
+        return result
+    except Exception as e:
+        print(f"Error loading from Supabase: {e}")
+        return {}
 
 
-def save_scenario(name: str, data: dict, am: str | None = None) -> None:
+def save_scenario(name: str, data: dict, am: Optional[str] = None) -> None:
     """
-    Save a scenario.
-    If am is provided → stored under that AM.
-    If am is None     → stored at the top level (anonymous, backwards-compat).
+    Save a scenario to Supabase.
     """
-    all_data = _load_all()
-    if am:
-        if str(am) not in all_data:
-            all_data[str(am)] = {}
-        all_data[str(am)][name] = data
-    else:
-        # anonymous save — kept for backwards compatibility
-        all_data[name] = data
-    _save_all(all_data)
+    if not supabase or not am:
+        return
+        
+    try:
+        # Upsert the scenario (update if it exists for this AM and Name, otherwise insert)
+        supabase.table("scenarios").upsert({
+            "am": str(am),
+            "scenario_name": name,
+            "data": data
+        }).execute()
+    except Exception as e:
+        print(f"Error saving to Supabase: {e}")
 
 
 def delete_scenario(name: str, am: str) -> None:
-    all_data = _load_all()
-    if str(am) in all_data and name in all_data[str(am)]:
-        del all_data[str(am)][name]
-        _save_all(all_data)
+    if not supabase:
+        return
+        
+    try:
+        supabase.table("scenarios").delete().eq("am", str(am)).eq("scenario_name", name).execute()
+    except Exception as e:
+        print(f"Error deleting from Supabase: {e}")
 
 
 # ─────────────────────────────────────────────
