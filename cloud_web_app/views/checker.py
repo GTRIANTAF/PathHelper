@@ -186,12 +186,16 @@ def _init_slots_from_scenario(loaded: dict, scenario: str):
             m1b = list(CEID_COURSES[m1].get("Group_B", {}).keys())
             m2a = list(CEID_COURSES[m2].get("Group_A", {}).keys())
             m2b = list(CEID_COURSES[m2].get("Group_B", {}).keys())
-            st.session_state["sel_s2_m1a"]  = [c for c in electives if c in m1a][:5]
-            st.session_state["sel_s2_m1b"]  = [c for c in electives if c in m1b][:2]
-            st.session_state["sel_s2_m2a"]  = [c for c in electives if c in m2a][:5]
-            st.session_state["sel_s2_m2b"]  = [c for c in electives if c in m2b][:2]
-            already = (st.session_state["sel_s2_m1a"] + st.session_state["sel_s2_m1b"] +
-                       st.session_state["sel_s2_m2a"] + st.session_state["sel_s2_m2b"])
+            s1a = [c for c in electives if c in m1a][:5]
+            s1b = [c for c in electives if c in m1b and c not in s1a][:2]
+            s2a = [c for c in electives if c in m2a and c not in s1a + s1b][:5]
+            s2b = [c for c in electives if c in m2b and c not in s1a + s1b + s2a][:2]
+            
+            st.session_state["sel_s2_m1a"]  = s1a
+            st.session_state["sel_s2_m1b"]  = s1b
+            st.session_state["sel_s2_m2a"]  = s2a
+            st.session_state["sel_s2_m2b"]  = s2b
+            already = s1a + s1b + s2a + s2b
             st.session_state["sel_s2_free"] = [c for c in electives if c not in already]
 
     elif scenario == "Σενάριο 3: Γενική κατεύθυνση":
@@ -273,7 +277,7 @@ def render():
                 avail_free = [c for c in get_all_available_courses() if c not in already]
                 sel_free = render_card_picker("s1_free", avail_free, 999)
 
-            my_electives = sel_main_a + sel_main_b + sel_other_a + sel_free
+            my_electives = list(dict.fromkeys(sel_main_a + sel_main_b + sel_other_a + sel_free))
 
     # ── Scenario 2 ────────────────────────────
     elif scenario == "Σενάριο 2: Δύο κύριες κατευθύνσεις":
@@ -315,7 +319,7 @@ def render():
                 avail_free2 = [c for c in sorted(get_all_available_courses()) if c not in already_sel]
                 sel_free_2  = render_card_picker("s2_free", avail_free2, 999)
 
-            my_electives = sel_m1_a + sel_m1_b + sel_m2_a + sel_m2_b + sel_free_2
+            my_electives = list(dict.fromkeys(sel_m1_a + sel_m1_b + sel_m2_a + sel_m2_b + sel_free_2))
 
     # ── Scenario 3 ────────────────────────────
     elif scenario == "Σενάριο 3: Γενική κατεύθυνση":
@@ -325,7 +329,7 @@ def render():
         with tab2:
             avail_gen_free = [c for c in sorted(get_all_available_courses()) if c not in sel_gen_a]
             sel_gen_free   = render_card_picker("s3_free", avail_gen_free, 999)
-        my_electives = sel_gen_a + sel_gen_free
+        my_electives = list(dict.fromkeys(sel_gen_a + sel_gen_free))
 
     st.divider()
 
