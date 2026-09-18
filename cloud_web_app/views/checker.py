@@ -298,12 +298,8 @@ def render():
                              if c not in sel_m1_a + sel_m1_b + sel_m2_a]
                 sel_m2_b = render_card_picker("s2_m2b", avail_m2b, 2)
             with tab5:
-                all_others = set(get_all_available_courses())
-                for d in [main_dir_1, main_dir_2]:
-                    for gd in CEID_COURSES[d].values():
-                        all_others -= set(gd.keys())
                 already_sel = sel_m1_a + sel_m1_b + sel_m2_a + sel_m2_b
-                avail_free2 = [c for c in sorted(all_others) if c not in already_sel]
+                avail_free2 = [c for c in sorted(get_all_available_courses()) if c not in already_sel]
                 sel_free_2  = render_card_picker("s2_free", avail_free2, 999)
 
             my_electives = sel_m1_a + sel_m1_b + sel_m2_a + sel_m2_b + sel_free_2
@@ -369,6 +365,16 @@ def render():
         st.caption("Επέλεξε 5 μαθήματα για το 7ο εξάμηνο — τα υπόλοιπα πηγαίνουν στο 9ο.")
 
         loaded_sem7 = loaded_scenario.get("sem7", []) if loaded_scenario else None
+        
+        # Build sem7 list dynamically from session state first
+        sem7 = []
+        for course in my_winter:
+            key = f"sem7_{course}"
+            # initialize state if not present based on loaded_sem7
+            if key not in st.session_state:
+                st.session_state[key] = (course in loaded_sem7) if loaded_sem7 is not None else False
+            if st.session_state[key]:
+                sem7.append(course)
 
         col7, col9 = st.columns(2)
         with col7:
@@ -392,12 +398,8 @@ def render():
                         unsafe_allow_html=True,
                     )
                 with c_chk:
-                    pre_val = (course in loaded_sem7) if loaded_sem7 is not None else False
-                    checked = st.checkbox("", value=pre_val, key=f"sem7_{course}", disabled=is_full and not in_sem7)
-                    if checked and course not in sem7:
-                        sem7.append(course)
-                    elif not checked and course in sem7:
-                        sem7.remove(course)
+                    checked = st.checkbox("", key=f"sem7_{course}", disabled=is_full)
+                    # Automatically triggers a rerun because it modifies session_state
 
         with col9:
             sem9 = [c for c in my_winter if c not in sem7]
@@ -439,7 +441,7 @@ def render():
     with col_clear:
         if st.button("Καθαρισμός", type="secondary", use_container_width=True):
             for k in list(st.session_state.keys()):
-                if k.startswith("sel_s") or k == "_load_sig":
+                if k.startswith("sel_s") or k.startswith("sem7_") or k == "_load_sig":
                     del st.session_state[k]
             st.session_state.loaded_scenario = {}
             st.session_state.check_performed = False
