@@ -141,7 +141,7 @@ st.markdown("""
         }
         /* Enforce truncation on the inner paragraph/span elements */
         .card-btn button p, .card-btn button span, .card-btn button div {
-            white-space: nowrap !important;
+            white-space: pre !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             width: 100% !important;

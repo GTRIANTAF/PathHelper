@@ -102,7 +102,7 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
                 else:
                     css_class = "card-btn card-btn-spring"
 
-                label = f"{'✓  ' if is_selected else ''}{course} {ects} ECTS · {sem_mark}"
+                label = f"{'✓  ' if is_selected else ''}{course}\n{ects} ECTS · {sem_mark}"
 
                 with cols[ci]:
                     st.markdown(f"<div class='{css_class}'>", unsafe_allow_html=True)
