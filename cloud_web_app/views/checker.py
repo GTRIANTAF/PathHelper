@@ -44,14 +44,30 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
             unsafe_allow_html=True,
         )
 
-    # ── Search bar ────────────────────────────
-    search = st.text_input(
-        "search",
-        placeholder="Αναζήτηση μαθήματος...",
-        key=f"search_{slot_key}",
-        label_visibility="collapsed",
-    )
-    filtered = [c for c in courses if search.lower() in c.lower()] if search else courses
+    # ── Search & Filter ────────────────────────────
+    col_s, col_f = st.columns([5, 5], vertical_alignment="bottom")
+    
+    with col_s:
+        search = st.text_input(
+            "search",
+            placeholder="Αναζήτηση μαθήματος...",
+            key=f"search_{slot_key}",
+            label_visibility="collapsed",
+        )
+    with col_f:
+        sem_filter = st.radio(
+            "Φίλτρο Εξαμήνου",
+            options=["Όλα", "Χειμερινό", "Εαρινό"],
+            horizontal=True,
+            key=f"filter_{slot_key}",
+            label_visibility="collapsed"
+        )
+
+    filtered = courses
+    if search:
+        filtered = [c for c in filtered if search.lower() in c.lower()]
+    if sem_filter != "Όλα":
+        filtered = [c for c in filtered if get_course_info(c) and get_course_info(c)["semester"] == sem_filter]
 
     # ── Two-panel layout ──────────────────────
     col_left, col_sep, col_right = st.columns([5, 0.1, 3])
@@ -82,7 +98,7 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
                 else:
                     css_class = "card-btn card-btn-spring"
 
-                label = f"{'✓  ' if is_selected else ''}{course}\n{ects} ECTS · {sem_mark}"
+                label = f"{'✓  ' if is_selected else ''}{course} {ects} ECTS · {sem_mark}"
 
                 with cols[ci]:
                     st.markdown(f"<div class='{css_class}'>", unsafe_allow_html=True)
