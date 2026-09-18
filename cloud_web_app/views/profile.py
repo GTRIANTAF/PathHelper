@@ -40,10 +40,8 @@ def _render_login():
         if verify_btn:
             ok, msg = verify_code(pending_am, code_input)
             if ok:
-                from streamlit_cookies_controller import CookieController
-                controller = CookieController()
                 st.session_state["logged_in_am"] = pending_am
-                controller.set("logged_in_am", pending_am, max_age=86400 * 30) # 30 days
+                st.session_state["_set_cookie_am"] = pending_am
                 del st.session_state["_pending_am"]
                 st.session_state.pop("_pending_code", None)
                 st.rerun()
@@ -67,9 +65,7 @@ def _render_scenarios(am: str):
     col_logout, _ = st.columns([2, 5])
     with col_logout:
         if st.button("Αποσύνδεση", type="secondary", use_container_width=True):
-            from streamlit_cookies_controller import CookieController
-            controller = CookieController()
-            controller.remove("logged_in_am")
+            st.session_state["_remove_cookie_am"] = True
             st.session_state.pop("logged_in_am", None)
             st.rerun()
 

@@ -11,6 +11,16 @@ from streamlit_cookies_controller import CookieController
 
 # Enforce cookies for persistence
 controller = CookieController()
+
+# Process pending cookie operations BEFORE checking state
+if "_set_cookie_am" in st.session_state:
+    controller.set("logged_in_am", st.session_state["_set_cookie_am"], max_age=86400 * 30)
+    del st.session_state["_set_cookie_am"]
+
+if "_remove_cookie_am" in st.session_state:
+    controller.remove("logged_in_am")
+    del st.session_state["_remove_cookie_am"]
+
 if "logged_in_am" not in st.session_state:
     cookie_am = controller.get("logged_in_am")
     if cookie_am:
