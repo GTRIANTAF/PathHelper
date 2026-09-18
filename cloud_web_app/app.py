@@ -7,6 +7,15 @@ sys.path.append(str(Path(__file__).parent))
 
 st.set_page_config(page_title="CEID Path Advisor", layout="wide", initial_sidebar_state="collapsed")
 
+from streamlit_cookies_controller import CookieController
+
+# Enforce cookies for persistence
+controller = CookieController()
+if "logged_in_am" not in st.session_state:
+    cookie_am = controller.get("logged_in_am")
+    if cookie_am:
+        st.session_state["logged_in_am"] = str(cookie_am)
+
 # ==========================================
 # CSS: ΤΟ "BOX-LIKE" DESIGN, ΡΙΓΕΣ & ΜΠΛΕ ΚΟΥΤΙΑ
 # ==========================================
