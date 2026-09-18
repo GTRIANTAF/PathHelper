@@ -45,7 +45,7 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
         )
 
     # ── Search & Filter ────────────────────────────
-    col_s, col_f = st.columns([5, 5], vertical_alignment="bottom")
+    col_s, col_x, col_f = st.columns([5, 0.5, 4.5], vertical_alignment="bottom")
     
     with col_s:
         search = st.text_input(
@@ -54,6 +54,10 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
             key=f"search_{slot_key}",
             label_visibility="collapsed",
         )
+    with col_x:
+        def clear_search(k):
+            st.session_state[k] = ""
+        st.button("✖", key=f"clear_{slot_key}", on_click=clear_search, args=(f"search_{slot_key}",), type="tertiary", use_container_width=True)
     with col_f:
         sem_filter = st.radio(
             "Φίλτρο Εξαμήνου",
@@ -70,7 +74,7 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
         filtered = [c for c in filtered if get_course_info(c) and get_course_info(c)["semester"] == sem_filter]
 
     # ── Two-panel layout ──────────────────────
-    col_left, col_sep, col_right = st.columns([5, 0.1, 3])
+    col_left, col_right = st.columns([5, 3], gap="large")
 
     with col_left:
         st.markdown("<div class='card-panel-header'>Διαθέσιμα Μαθήματα</div>", unsafe_allow_html=True)
@@ -116,13 +120,6 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
                     else:
                         st.session_state[state_key].append(course)
                     st.rerun()
-
-    # Thin separator
-    with col_sep:
-        st.markdown(
-            "<div style='border-left:1px solid #eee;height:100%;min-height:300px;'></div>",
-            unsafe_allow_html=True,
-        )
 
     with col_right:
         st.markdown("<div class='card-panel-header'>Επιλεγμένα</div>", unsafe_allow_html=True)

@@ -73,6 +73,18 @@ st.markdown("""
             box-shadow: 0 6px 15px rgba(41, 128, 185, 0.4);
             color: white;
         }
+        div.stButton > button[kind="tertiary"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: #999 !important;
+        }
+        div.stButton > button[kind="tertiary"]:hover {
+            color: #e74c3c !important;
+            transform: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
 
         /* 5. Course Card Picker Styles */
         .card-panel-header {
@@ -120,11 +132,20 @@ st.markdown("""
         .card-btn > div.stButton > button {
             text-align: left !important;
             height: auto !important;
-            white-space: normal !important;
+            display: block !important;
             padding: 10px 12px !important;
             line-height: 1.4 !important;
             font-weight: 500 !important;
             font-size: 13px !important;
+            overflow: hidden !important;
+        }
+        /* Enforce truncation on the inner paragraph/span elements */
+        .card-btn button p, .card-btn button span, .card-btn button div {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            width: 100% !important;
+            margin: 0 !important;
         }
         .card-btn-winter > div.stButton > button {
             border-left: 3px solid #3498db !important;
