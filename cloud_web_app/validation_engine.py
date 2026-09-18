@@ -1,6 +1,6 @@
 from knowledge_base import CEID_COURSES, get_total_ects
 
-def validate_scenario(scenario, categorized_electives, my_electives, my_winter, my_spring, sem7, sem9, thesis_checked):
+def validate_scenario(scenario, categorized_electives, my_electives, my_winter, my_spring, sem7, sem9, thesis_checked, req_winter=11, req_spring=6):
     """
     Returns a list of dicts with {"type": "success"|"error"|"warning", "message": "..."}
     and a boolean indicating if the program is completely valid (errors == 0).
@@ -24,10 +24,10 @@ def validate_scenario(scenario, categorized_electives, my_electives, my_winter, 
             errors += 1
 
     # --- 2. ΕΛΕΓΧΟΣ ΕΞΑΜΗΝΩΝ ---
-    if len(my_winter) >= 11 and len(my_spring) >= 6:
+    if len(my_winter) == req_winter and len(my_spring) == req_spring:
         results.append({"type": "success", "message": f"**Εξάμηνα:** Αποδεκτή κατανομή ({len(my_winter)} Χειμερινά, {len(my_spring)} Εαρινά)."})
     else:
-        results.append({"type": "error", "message": f"**Εξάμηνα:** Έχεις {len(my_winter)} Χειμερινά (πρέπει τουλάχιστον 11) και {len(my_spring)} Εαρινά (πρέπει τουλάχιστον 6)."})
+        results.append({"type": "error", "message": f"**Εξάμηνα:** Έχεις {len(my_winter)} Χειμερινά (πρέπει ακριβώς {req_winter}) και {len(my_spring)} Εαρινά (πρέπει ακριβώς {req_spring})."})
         errors += 1
 
     if len(sem7) != 5:

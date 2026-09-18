@@ -336,7 +336,34 @@ def render():
     # ==========================================
     # ΒΗΜΑ 2: ΚΑΤΑΝΟΜΗ ΣΤΑ ΕΞΑΜΗΝΑ
     # ==========================================
-    st.markdown("### **Βήμα 2**: Κατανομή στα Εξάμηνα")
+    st.markdown("### **Βήμα 2**: Κατανομή στα Εξάμηνα & Διπλωματική")
+
+    has_internship = "Πρακτική άσκηση" in my_electives
+
+    thesis_options = [
+        "Σενάριο Α: Αποκλειστικά Διπλωματική στο 10ο εξάμηνο (Χωρίς καθόλου μαθήματα)",
+        "Σενάριο Β: Διπλωματική + 1 Μάθημα (π.χ. Πρακτική) στο 10ο εξάμηνο",
+        "Σενάριο Γ: Διπλωματική + 2 Μαθήματα στο 10ο εξάμηνο"
+    ]
+
+    saved_thesis = loaded_scenario.get("thesis_split", thesis_options[1] if has_internship else thesis_options[0]) if loaded_scenario else (thesis_options[1] if has_internship else thesis_options[0])
+    t_idx = thesis_options.index(saved_thesis) if saved_thesis in thesis_options else (1 if has_internship else 0)
+
+    if has_internship:
+        st.info("💡 **Πρακτική Άσκηση:** Επειδή έχεις επιλέξει πρακτική, πρέπει υποχρεωτικά να αφήσεις χώρο στο 10ο εξάμηνο (Σενάριο Β ή Γ).")
+
+    st.markdown("<p style='font-size:14px; margin-bottom:5px;'>Πώς θέλεις να οργανώσεις το τελευταίο σου εξάμηνο;</p>", unsafe_allow_html=True)
+    thesis_split = st.radio("Κατανομή Διπλωματικής Εργασίας:", thesis_options, index=t_idx, label_visibility="collapsed")
+
+    if has_internship and thesis_split == thesis_options[0]:
+        st.error("⚠️ Σφάλμα: Δεν μπορείς να επιλέξεις το Σενάριο Α εφόσον έχεις Πρακτική Άσκηση.")
+
+    if thesis_split == thesis_options[0]:
+        req_winter, req_spring = 11, 6
+    elif thesis_split == thesis_options[1]:
+        req_winter, req_spring = 10, 7
+    else:
+        req_winter, req_spring = 9, 8
 
     my_winter = sorted([c for c in my_electives if get_course_info(c) and get_course_info(c)["semester"] == "Χειμερινό"])
     my_spring = sorted([c for c in my_electives if get_course_info(c) and get_course_info(c)["semester"] == "Εαρινό"])
@@ -345,17 +372,21 @@ def render():
     if my_electives:
         col_w, col_s = st.columns(2)
         with col_w:
-            st.markdown(f"**Χειμερινά: {len(my_winter)}/11**")
-            st.progress(min(len(my_winter) / 11, 1.0))
-            if len(my_winter) < 11:
-                st.warning(f"Χρειάζεσαι {11 - len(my_winter)} ακόμα Χειμερινά.")
+            st.markdown(f"**Χειμερινά: {len(my_winter)}/{req_winter}**")
+            st.progress(min(len(my_winter) / req_winter, 1.0))
+            if len(my_winter) < req_winter:
+                st.warning(f"Χρειάζεσαι {req_winter - len(my_winter)} ακόμα Χειμερινά.")
+            elif len(my_winter) > req_winter:
+                st.error(f"Έχεις επιλέξει {len(my_winter) - req_winter} Χειμερινά παραπάνω από όσα χρειάζεσαι.")
             else:
                 st.success("Ολοκληρώθηκαν τα Χειμερινά!")
         with col_s:
-            st.markdown(f"**Εαρινά: {len(my_spring)}/6**")
-            st.progress(min(len(my_spring) / 6, 1.0))
-            if len(my_spring) < 6:
-                st.warning(f"Χρειάζεσαι {6 - len(my_spring)} ακόμα Εαρινά.")
+            st.markdown(f"**Εαρινά: {len(my_spring)}/{req_spring}**")
+            st.progress(min(len(my_spring) / req_spring, 1.0))
+            if len(my_spring) < req_spring:
+                st.warning(f"Χρειάζεσαι {req_spring - len(my_spring)} ακόμα Εαρινά.")
+            elif len(my_spring) > req_spring:
+                st.error(f"Έχεις επιλέξει {len(my_spring) - req_spring} Εαρινά παραπάνω από όσα χρειάζεσαι.")
             else:
                 st.success("Ολοκληρώθηκαν τα Εαρινά!")
 
@@ -435,6 +466,12 @@ def render():
                     )
             else:
                 st.markdown("<div class='empty-panel'>Τα υπόλοιπα Χειμερινά θα εμφανιστούν εδώ.</div>", unsafe_allow_html=True)
+                
+            if thesis_split == thesis_options[1]:
+                st.markdown("<div style='border-left:3px solid #f1c40f;background:#fef9e7;padding:8px 12px;border-radius:6px;margin-top:4px;'><div style='font-size:13px;font-weight:500;'>Διπλωματική Εργασία (Μέρος Α)</div><div style='font-size:11px;color:#888;'>5 ECTS · Χ</div></div>", unsafe_allow_html=True)
+            elif thesis_split == thesis_options[2]:
+                st.markdown("<div style='border-left:3px solid #f1c40f;background:#fef9e7;padding:8px 12px;border-radius:6px;margin-top:4px;'><div style='font-size:13px;font-weight:500;'>Διπλωματική Εργασία (Μέρος Α)</div><div style='font-size:11px;color:#888;'>10 ECTS · Χ</div></div>", unsafe_allow_html=True)
+
     else:
         st.warning("Επιλέξτε μαθήματα στο Βήμα 1 για να ξεκλειδώσετε τον προγραμματισμό των εξαμήνων.")
 
@@ -443,8 +480,9 @@ def render():
     # ==========================================
     # ΒΗΜΑ 3: ΔΙΠΛΩΜΑΤΙΚΗ
     # ==========================================
-    st.markdown("### **Βήμα 3**: Διπλωματική Εργασία")
-    thesis_checked = st.checkbox("Έχω αναλάβει / Ολοκληρώσει Διπλωματική Εργασία (30 ECTS)", value=False)
+    st.markdown("### **Βήμα 3**: 10ο Εξάμηνο & Διπλωματική Εργασία")
+    thesis_ects = 30 if thesis_split == thesis_options[0] else (25 if thesis_split == thesis_options[1] else 20)
+    thesis_checked = st.checkbox(f"Έχω αναλάβει / Ολοκληρώσει Διπλωματική Εργασία ({thesis_ects} ECTS στο 10ο Εξάμηνο)", value=False)
 
     st.divider()
 
@@ -500,6 +538,8 @@ def render():
             sem7=sem7,
             sem9=sem9,
             thesis_checked=thesis_checked,
+            req_winter=req_winter,
+            req_spring=req_spring,
         )
         errors = 0 if is_valid else 1
 
@@ -542,6 +582,7 @@ def render():
                     "main_dir":   locals().get("main_dir"),
                     "main_dir_1": locals().get("main_dir_1"),
                     "main_dir_2": locals().get("main_dir_2"),
+                    "thesis_split": thesis_split,
                     "my_electives": my_electives,
                     "my_winter": my_winter,
                     "my_spring": my_spring,
