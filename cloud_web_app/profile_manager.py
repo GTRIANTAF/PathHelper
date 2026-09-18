@@ -77,7 +77,7 @@ def delete_scenario(name: str, am: str) -> None:
 class PDF(FPDF):
     def header(self):
         self.set_font("Arial", "", 13)
-        self.cell(0, 10, "CEID Path Advisor — Final Scenario", ln=True, align="C")
+        self.cell(0, 10, "CEID Path Advisor - Final Scenario", ln=True, align="C")
         self.ln(6)
 
 
