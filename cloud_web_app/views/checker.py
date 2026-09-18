@@ -398,7 +398,7 @@ def render():
                         unsafe_allow_html=True,
                     )
                 with c_chk:
-                    checked = st.checkbox("", key=f"sem7_{course}", disabled=is_full)
+                    checked = st.checkbox("Επιλογή", key=f"sem7_{course}", disabled=is_full, label_visibility="collapsed")
                     # Automatically triggers a rerun because it modifies session_state
 
         with col9:
