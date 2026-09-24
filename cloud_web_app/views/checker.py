@@ -90,19 +90,33 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
                 info       = get_course_info(course)
                 sem        = info["semester"] if info else ""
                 ects       = info["ects"]     if info else 5
+                active     = info.get("active", True) if info else True
                 sem_mark   = "Χ" if sem == "Χειμερινό" else "Ε"
                 is_selected = course in selected
                 is_full     = filled >= max_picks and not is_selected
 
                 # CSS wrapper class
-                if is_selected:
+                if not active:
+                    if is_selected:
+                        css_class = "card-btn card-btn-selected"
+                        label = f"✓ {course} (Δεν διδάσκεται)  \n{ects} ECTS · {sem_mark}"
+                        btn_disabled = False
+                    else:
+                        css_class = "card-btn card-btn-inactive"
+                        label = f"{course} (Δεν διδάσκεται)  \n{ects} ECTS · {sem_mark}"
+                        btn_disabled = True
+                elif is_selected:
                     css_class = "card-btn card-btn-selected"
+                    label = f"✓  {course}  \n{ects} ECTS · {sem_mark}"
+                    btn_disabled = False
                 elif sem == "Χειμερινό":
                     css_class = "card-btn card-btn-winter"
+                    label = f"{course}  \n{ects} ECTS · {sem_mark}"
+                    btn_disabled = is_full
                 else:
                     css_class = "card-btn card-btn-spring"
-
-                label = f"{'✓  ' if is_selected else ''}{course}  \n{ects} ECTS · {sem_mark}"
+                    label = f"{course}  \n{ects} ECTS · {sem_mark}"
+                    btn_disabled = is_full
 
                 with cols[ci]:
                     st.markdown(f"<div class='{css_class}'>", unsafe_allow_html=True)
@@ -110,7 +124,7 @@ def render_card_picker(slot_key: str, courses: list, max_picks: int, preselected
                         label,
                         key=f"card_{slot_key}_{course}",
                         use_container_width=True,
-                        disabled=is_full,
+                        disabled=btn_disabled,
                     )
                     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -395,16 +409,16 @@ def render():
         # 8th semester (spring — auto)
         st.markdown("**8ο Εξάμηνο (Εαρινό)**")
         if my_spring:
-            spring_html = "".join([
-                f"""<div class='selected-card spring'>
-                    <div>
-                        <div class='course-name'>{c}</div>
-                        <div class='course-meta'>{get_course_info(c)['ects']} ECTS · Ε</div>
-                    </div>
-                </div>"""
-                for c in my_spring
-            ])
-            st.markdown(spring_html, unsafe_allow_html=True)
+            for c in my_spring:
+                st.markdown(
+                    f"""<div class='selected-card spring' style='margin-bottom:0px;'>
+                        <div>
+                            <div class='course-name'>{c}</div>
+                            <div class='course-meta'>{get_course_info(c)['ects']} ECTS · Ε</div>
+                        </div>
+                    </div>""",
+                    unsafe_allow_html=True
+                )
         else:
             st.markdown("<div class='empty-panel'>Δεν υπάρχουν Εαρινά μαθήματα ακόμα.</div>", unsafe_allow_html=True)
 
@@ -433,7 +447,7 @@ def render():
                 in_sem7 = course in sem7
                 is_full = len(sem7) >= 5 and not in_sem7
 
-                c_name, c_chk = st.columns([5, 1])
+                c_name, c_chk = st.columns([5, 1], vertical_alignment="center")
                 border = "#3498db"
                 with c_name:
                     bg = "#eaf4fb" if in_sem7 else "#fff"

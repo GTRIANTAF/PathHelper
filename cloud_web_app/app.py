@@ -177,6 +177,11 @@ st.markdown("""
             border-left: 3px solid #3498db !important;
             color: #2980b9 !important;
         }
+        .card-btn-inactive > div.stButton > button {
+            border: 1px solid #dcdde1 !important;
+            background: repeating-linear-gradient(45deg, #fdfdfd, #fdfdfd 10px, #f2f2f2 10px, #f2f2f2 20px) !important;
+            color: #999 !important;
+        }
         .remove-btn > div.stButton > button {
             border: none !important;
             color: #ccc !important;
@@ -198,6 +203,30 @@ st.markdown("""
         .picker-search input {
             border-radius: 20px !important;
             font-size: 13px !important;
+        }
+        .hide-label label {
+            display: none !important;
+        }
+
+        /* 8. Mobile Layout Fixes */
+        @media (max-width: 640px) {
+            /* Prevent 7th semester course cards + checkboxes from wrapping */
+            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stCheckbox"]) {
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+            }
+            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stCheckbox"]) > div[data-testid="column"]:nth-child(1) {
+                width: 80% !important;
+                flex: 1 1 80% !important;
+            }
+            div[data-testid="stHorizontalBlock"]:has(div[data-testid="stCheckbox"]) > div[data-testid="column"]:nth-child(2) {
+                width: 20% !important;
+                flex: 1 1 20% !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         }
 
     </style>
